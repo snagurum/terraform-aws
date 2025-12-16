@@ -32,6 +32,23 @@ data "aws_ami" "nat_ami" {
   }
 }
 
+module "iam_role" {
+  source = "../../iam-role"
+
+  payload = <<EOT
+{
+  "role_name": "${local.name}-role",
+  "trust_policy_statement":  [{
+    "principals": [{ 
+        "type" : "Service",
+        "identifiers" : ["ec2.amazonaws.com"] 
+      }]
+  }],
+  "inline_policies": {},
+  "managed_policies": ["arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"] 
+}
+EOT
+}
 
 module "nat-instance" {
   source                      = "../../ec2"
@@ -44,6 +61,7 @@ module "nat-instance" {
   vpc_id                      = var.vpc_id
   security_group_ids          = toset([module.nat-instance_sg.id])
   key_pair_name                    = var.key_pair_name
+  role_name = module.iam_role.name
 
   user_data_base64 = base64encode(file("${path.module}/user-data.tpl"))
 }

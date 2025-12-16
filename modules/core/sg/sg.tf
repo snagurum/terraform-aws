@@ -7,7 +7,7 @@ resource "aws_security_group" "this" {
   dynamic "ingress" {
     for_each = var.ingress_rules // Iterates over the list of objects
     content {
-      from_port       = ingress.value.port == -65535 ? 1024 : ingress.value.port
+      from_port       = ingress.value.port == -65535 ? 1 : ingress.value.port
       to_port         = ingress.value.port == -65535 ? 65535 : ingress.value.port
       protocol        = ingress.value.protocol
       cidr_blocks     = ingress.value.cidr_blocks
